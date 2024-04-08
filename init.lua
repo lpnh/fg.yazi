@@ -18,7 +18,7 @@ local function entry(_, args)
 	local cwd = state()
 	local shell_value = os.getenv("SHELL"):match(".*/(.*)")
 	local cmd_args = ""
-	if args == "fzf" then
+	if args[1] == "fzf" then
 		cmd_args = [[fzf --preview='bat --color=always {1}']]
 	elseif shell_value == "fish" then
 		cmd_args = [[rg ./ --line-number | fzf --preview='set line {2} && set begin ( test $line -lt 11  &&  echo (math "$line-1") || echo  10 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}' --delimiter=':']]
