@@ -9,6 +9,15 @@ local function splitAndGetFirst(inputstr, sep)
     return inputstr
 end
 
+local function getShellName(inputstr)
+
+    local sepStart, sepEnd = string.find(inputstr, "/")
+    if sepEnd then
+        return string.sub(inputstr, sepEnd + 1)
+    end
+    return inputstr
+end
+
 local state = ya.sync(function() return tostring(cx.active.current.cwd) end)
 
 local function fail(s, ...) ya.notify { title = "Fzf", content = string.format(s, ...), timeout = 5, level = "error" } end
@@ -16,14 +25,18 @@ local function fail(s, ...) ya.notify { title = "Fzf", content = string.format(s
 local function entry(_, args)
 	local _permit = ya.hide()
 	local cwd = state()
-	local cmd  = ""
-	if args[1] == "fzf" then
-		cmd = "pfzf"
+	local shell_value = os.getenv("SHELL"):match(".*/(.*)")
+	local cmd_args = ""
+	if args == "fzf" then
+		cmd_args = [[fzf --preview='bat --color=always {1}']]
+	elseif shell_value == "fish" then
+		cmd_args = [[rg ./ --line-number | fzf --preview='set line {2} && set begin ( test $line -lt 11  &&  echo (math "$line-1") || echo  10 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}' --delimiter=':']]
 	else
-		cmd = "rfzf"
+		cmd_args = [[rg ./ --line-number | fzf --preview='line={2} && begin=$( if \[\[ $line -lt 11 \]\]; then echo $((line-1)); else echo 10; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}' --delimiter=':']]
 	end
+	
 	local child, err =
-		Command(cmd):cwd(cwd):stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
+		Command(shell_value):args({"-c", cmd_args}):cwd(cwd):stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
 
 	if not child then
 		return fail("Spawn `rfzf` failed with error code %s. Do you have it installed?", err)

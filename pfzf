@@ -1,3 +1,0 @@
-#!/usr/bin/bash 
-
-fzf --preview='bat --color=always {1}'
