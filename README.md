@@ -10,7 +10,6 @@ A Yazi plugin for rg search with fzf file preview
 
 > [!NOTE]
 > The latest main branch of Yazi is required at the moment.
-> only support fish now,if you use other shell, change the rfzf scipts
 
 ## Dependcy
 - fzf
