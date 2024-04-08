@@ -16,7 +16,6 @@ A Yazi plugin for rg search with fzf file preview
 - fzf
 - ripgrep
 - bat
-- fish
 
 ## Install
 
