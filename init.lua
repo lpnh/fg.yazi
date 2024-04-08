@@ -9,15 +9,6 @@ local function splitAndGetFirst(inputstr, sep)
     return inputstr
 end
 
-local function getShellName(inputstr)
-
-    local sepStart, sepEnd = string.find(inputstr, "/")
-    if sepEnd then
-        return string.sub(inputstr, sepEnd + 1)
-    end
-    return inputstr
-end
-
 local state = ya.sync(function() return tostring(cx.active.current.cwd) end)
 
 local function fail(s, ...) ya.notify { title = "Fzf", content = string.format(s, ...), timeout = 5, level = "error" } end
