@@ -1,0 +1,3 @@
+#!/usr/bin/bash 
+
+rg ./ --line-number | fzf --preview='line={2} && begin=$( if [[ $line -lt 11 ]]; then echo $((line-1)); else echo 10; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}' --delimiter=':'

@@ -23,7 +23,13 @@ A Yazi plugin for rg search with fzf file preview
 ```bash
 git clone https://github.com/DreamMaoMao/fg.yazi.git ~/.config/yazi/plugins/fg.yazi
 chmod +x ~/.config/yazi/plugins/fg.yazi/rfzf
-sudo ln -s ~/.config/yazi/plugins/fg.yazi/rfzf /usr/local/bin/rfzf
+
+# fish
+sudo ln -s ~/.config/yazi/plugins/fg.yazi/rfzf_fish /usr/local/bin/rfzf
+
+# zsh or bash
+sudo ln -s ~/.config/yazi/plugins/fg.yazi/rfzf_bash /usr/local/bin/rfzf
+
 ```
 
 ## Usage
