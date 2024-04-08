@@ -13,12 +13,17 @@ local state = ya.sync(function() return tostring(cx.active.current.cwd) end)
 
 local function fail(s, ...) ya.notify { title = "Fzf", content = string.format(s, ...), timeout = 5, level = "error" } end
 
-local function entry()
+local function entry(_, args)
 	local _permit = ya.hide()
 	local cwd = state()
-
+	local cmd  = ""
+	if args[1] == "fzf" then
+		cmd = "pfzf"
+	else
+		cmd = "rfzf"
+	end
 	local child, err =
-		Command("rfzf"):cwd(cwd):stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
+		Command(cmd):cwd(cwd):stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
 
 	if not child then
 		return fail("Spawn `rfzf` failed with error code %s. Do you have it installed?", err)

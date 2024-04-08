@@ -29,6 +29,9 @@ sudo ln -s ~/.config/yazi/plugins/fg.yazi/rfzf_fish /usr/local/bin/rfzf
 # zsh or bash
 sudo ln -s ~/.config/yazi/plugins/fg.yazi/rfzf_bash /usr/local/bin/rfzf
 
+# only fzf
+sudo ln -s ~/.config/yazi/plugins/fg.yazi/pfzf /usr/local/bin/pfzf
+
 ```
 
 ## Usage
@@ -37,6 +40,12 @@ sudo ln -s ~/.config/yazi/plugins/fg.yazi/rfzf_bash /usr/local/bin/rfzf
 [[manager.prepend_keymap]]
 on   = [ "f","g" ]
 run  = "plugin fg"
-desc = "rg search"
+desc = "find file by content"
 ```
 
+```toml
+[[manager.prepend_keymap]]
+on   = [ "f","f" ]
+run  = "plugin fg --args='fzf'"
+desc = "find file by file name"
+```
