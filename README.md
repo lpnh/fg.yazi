@@ -1,15 +1,15 @@
 # fg.yazi
 
 
-
-https://github.com/DreamMaoMao/fg.yazi/assets/30348075/aff8866b-d5df-4ba3-9cd4-0ec0e8869385
-
+https://github.com/DreamMaoMao/fg.yazi/assets/30348075/4b34ff25-800f-4250-b109-172f12a8b0ce
 
 
 A Yazi plugin for rg search with fzf file preview
 
 > [!NOTE]
 > The latest main branch of Yazi is required at the moment.
+> 
+> Support shell: `bash`, `zsh` ,`fish`
 
 ## Dependcy
 - fzf
