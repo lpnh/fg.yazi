@@ -22,6 +22,8 @@ local function entry(_, args)
 		cmd_args = [[fzf --preview='bat --color=always {1}']]
 	elseif shell_value == "fish" then
 		cmd_args = [[rg ./ --line-number | fzf --preview='set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}' --delimiter=':' --preview-window up:60% --nth '3..']]
+	elseif shell_value == "nu" then
+		cmd_args = "rg . --line-number | fzf --preview='let line = ({2} | into int); let begin = if $line < 7 { $line - 1 } else { 6 }; bat --highlight-line={2} --color=always --line-range $'($line - $begin):($line + 10)' {1}' --delimiter=':' --preview-window up:60% --nth '3..'"
 	else
 		cmd_args = "rg ./ --line-number | fzf --preview='line={2} && begin=$( if [[ $line -lt 7 ]]; then echo $((line-1)); else echo 6; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}' --delimiter=':' --preview-window up:60% --nth '3..'"
 	end
