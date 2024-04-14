@@ -9,7 +9,7 @@ A Yazi plugin for rg search with fzf file preview
 > [!NOTE]
 > The latest main branch of Yazi is required at the moment.
 > 
-> Support shell: `bash`, `zsh` ,`fish`
+> Support shell: `bash`, `zsh` ,`fish` ,`nushell`
 
 ## Dependcy
 - fzf
