@@ -8,7 +8,7 @@ A Yazi plugin for rg search with fzf file preview
 
 > [!NOTE]
 > The latest main branch of Yazi is required at the moment.
-> 
+>
 > Support shell: `bash`, `zsh` ,`fish` ,`nushell`
 
 ## Dependcy
@@ -29,6 +29,13 @@ git clone https://github.com/DreamMaoMao/fg.yazi.git ~/.config/yazi/plugins/fg.y
 on   = [ "f","g" ]
 run  = "plugin fg"
 desc = "find file by content"
+```
+
+```toml
+[[manager.prepend_keymap]]
+on   = [ "f","G" ]
+run  = "plugin fg --args='rg'"
+desc = "find file by content using ripgrep"
 ```
 
 ```toml
