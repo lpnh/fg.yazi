@@ -39,6 +39,16 @@ local function entry(_, args)
 				--preview-window 'up,60%' \
 				--nth '3..'
 		]]
+		if shell_value == "nu" then
+			local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
+			cmd_args = [[fzf --ansi --disabled --bind "start:reload:]]
+				.. rg_prefix
+				.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
+				.. rg_prefix
+				.. [[{q} }" --delimiter : --preview ']]
+				.. preview_cmd
+				.. [[' --preview-window 'up,60%' --nth '3..']]
+		end
 	else
 		cmd_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']] .. preview_cmd .. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 	end
