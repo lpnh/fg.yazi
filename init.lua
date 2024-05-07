@@ -28,7 +28,18 @@ local function entry(_, args)
 
 	if args[1] == "fzf" then
 		cmd_args = [[fzf --preview='bat --color=always {1}']]
-	elseif args[1] == "rg" then
+	elseif args[1] == "rg" and shell_value == "fish" then
+		cmd_args = [[
+			RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case " \
+			fzf --ansi --disabled \
+				--bind "start:reload:$RG_PREFIX {q}" \
+				--bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
+				--delimiter : \
+				--preview ']] .. preview_cmd .. [[' \
+				--preview-window 'up,60%' \
+				--nth '3..'
+		]]
+	elseif args[1] == "rg" and (shell_value == "bash" or shell_value == "zsh")  then
 		cmd_args = [[
 			RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
 			fzf --ansi --disabled \
@@ -39,16 +50,15 @@ local function entry(_, args)
 				--preview-window 'up,60%' \
 				--nth '3..'
 		]]
-		if shell_value == "nu" then
-			local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
-			cmd_args = [[fzf --ansi --disabled --bind "start:reload:]]
-				.. rg_prefix
-				.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
-				.. rg_prefix
-				.. [[{q} }" --delimiter : --preview ']]
-				.. preview_cmd
-				.. [[' --preview-window 'up,60%' --nth '3..']]
-		end
+	elseif args[1] == "rg" and shell_value == "nu" then
+		local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
+		cmd_args = [[fzf --ansi --disabled --bind "start:reload:]]
+			.. rg_prefix
+			.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
+			.. rg_prefix
+			.. [[{q} }" --delimiter : --preview ']]
+			.. preview_cmd
+			.. [[' --preview-window 'up,60%' --nth '3..']]
 	else
 		cmd_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']] .. preview_cmd .. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 	end
