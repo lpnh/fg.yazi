@@ -24,7 +24,7 @@ git clone https://github.com/DreamMaoMao/fg.yazi.git ~/.config/yazi/plugins/fg.y
 
 ## Usage
 
-`This option uses ripgrep to output all the lines of all files, and then uses fzf to fuzzy search`
+`This option uses ripgrep to output all the lines of all files, and then uses fzf to fuzzy matching`
 ```toml
 [[manager.prepend_keymap]]
 on   = [ "f","g" ]
@@ -32,7 +32,7 @@ run  = "plugin fg"
 desc = "find file by content (fuzzy match)"
 ```
 
-`This option passes the input to ripgrep for a match search, reusing the rg search each time the input is changed`
+`This option passes the input to ripgrep for a match search, reusing the rg search each time the input is changed,faster search speed for large folders, but not support fuzzy matching`
 ```toml
 [[manager.prepend_keymap]]
 on   = [ "f","G" ]
