@@ -59,6 +59,8 @@ local function entry(_, args)
 			.. [[{q} }" --delimiter : --preview ']]
 			.. preview_cmd
 			.. [[' --preview-window 'up,60%' --nth '3..']]
+	elseif args[1] == "rga" then
+		cmd_args = [[rga --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']] .. preview_cmd .. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 	else
 		cmd_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']] .. preview_cmd .. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 	end

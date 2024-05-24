@@ -14,6 +14,7 @@ A Yazi plugin for searching file content or filenames using `ripgrep` with `fzf`
 - fzf
 - ripgrep
 - bat
+- ripgrep-all (optional)
 
 ## Install
 
@@ -30,6 +31,15 @@ This option uses `ripgrep` to output all the lines of all files, and then uses `
 on   = [ "f","g" ]
 run  = "plugin fg"
 desc = "find file by content (fuzzy match)"
+```
+
+This option uses `ripgrep-all` to output all the lines of all files, and then uses `fzf` to fuzzy matching. Make sure to have `ripgrep-all` installed.
+
+```toml
+[[manager.prepend_keymap]]
+on   = [ "f","a" ]
+run  = "plugin fg --args='rga'"
+desc = "find file by content (ripgrep-all)"
 ```
 
 The following option passes the input to `ripgrep` for a match search, reusing the `rg` search each time the input is changed. This is useful for searching in large folders due to increased speed, but it does not support fuzzy matching.
