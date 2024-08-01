@@ -62,7 +62,7 @@ local function entry(_, args)
 			.. [[{q} }" --delimiter : --preview ']]
 			.. preview_cmd
 			.. [[' --preview-window 'up,60%' --nth '3..']]
-	elseif args[1] == "rga" then
+	elseif args[1] == "rga" and (shell_value == "bash" or shell_value == "zsh") then
 		cmd_args = [[
 			RG_PREFIX="rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
 			fzf --ansi --disabled \
@@ -77,6 +77,14 @@ local function entry(_, args)
 				--preview-window 'up,60%' \
 				--nth '3..'
 		]]
+	elseif args[1] == "rga" and shell_value == "nu" then
+		local rg_prefix =
+			"rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
+		cmd_args = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
+			.. rg_prefix
+			.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
+			.. rg_prefix
+			.. [[{q} }" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']]
 	else
 		cmd_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']]
 			.. preview_cmd
