@@ -60,7 +60,21 @@ local function entry(_, args)
 			.. preview_cmd
 			.. [[' --preview-window 'up,60%' --nth '3..']]
 	elseif args[1] == "rga" then
-		cmd_args = [[rga --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']] .. preview_cmd .. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
+		cmd_args = [[
+			RG_PREFIX="rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
+			fzf --ansi --disabled \
+			        --layout=reverse \
+        			--sort \
+        			--header-first \
+        			--header '---- Search inside files ----' \
+				--bind "start:reload:$RG_PREFIX {q}" \
+				--bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
+				--delimiter : \
+				--preview 'rga --smart-case --pretty --context 5 {q} {}' \
+				--preview-window 'up,60%' \
+				--nth '3..'
+		]]
+
 	else
 		cmd_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']] .. preview_cmd .. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 	end
