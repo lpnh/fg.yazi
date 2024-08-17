@@ -30,7 +30,8 @@ ya pack -u
 
 ## Usage
 
-This option uses `ripgrep` to output all the lines of all files, and then uses `fzf` to fuzzy matching.
+This option uses `ripgrep` to output all the lines of all files, and then uses
+`fzf` to fuzzy matching.
 
 ```toml
 [[manager.prepend_keymap]]
@@ -39,7 +40,9 @@ run  = "plugin fg"
 desc = "find file by content (fuzzy match)"
 ```
 
-The following option passes the input to `ripgrep` for a match search, reusing the `rg` search each time the input is changed. This is useful for searching in large folders due to increased speed, but it does not support fuzzy matching.
+The following option passes the input to `ripgrep` for a match search, reusing
+the `rg` search each time the input is changed. This is useful for searching in
+large folders due to increased speed, but it does not support fuzzy matching.
 
 ```toml
 [[manager.prepend_keymap]]
@@ -55,7 +58,8 @@ run  = "plugin fg --args='fzf'"
 desc = "find file by filename"
 ```
 
-⚠️ EXPERIMENTAL ⚠️ This option uses `ripgrep-all` to output all the lines of all files, and then uses `fzf` to fuzzy matching.
+⚠️ EXPERIMENTAL ⚠️ This option uses `ripgrep-all` to output all the lines of all
+files, and then uses `fzf` to fuzzy matching.
 
 ```toml
 [[manager.prepend_keymap]]
