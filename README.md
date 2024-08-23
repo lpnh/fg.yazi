@@ -72,3 +72,9 @@ on   = [ "f","f" ]
 run  = "plugin fg --args='fzf'"
 desc = "find file by filename"
 ```
+
+## Tips
+
+You can customize the default colors by using the `fzf` environment variable,
+`FZF_DEFAULT_OPTS`. For an example, check out the [Catppuccin's
+repo](https://github.com/catppuccin/fzf?tab=readme-ov-file#usage).
