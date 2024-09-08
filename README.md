@@ -78,3 +78,8 @@ desc = "find file by filename"
 You can customize the default colors by using the `fzf` environment variable,
 `FZF_DEFAULT_OPTS`. For an example, check out the [Catppuccin's
 repo](https://github.com/catppuccin/fzf?tab=readme-ov-file#usage).
+
+## About
+
+This is a fork of DreamMaoMao's `fg.yazi` plugin, you can find it at
+<https://gitee.com/DreamMaoMao/fg.yazi>
