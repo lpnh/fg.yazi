@@ -1,12 +1,12 @@
-local function splitAndGetFirst(inputstr, sep)
+local function split_and_get_first(input, sep)
 	if sep == nil then
 		sep = "%s"
 	end
-	local sepStart, sepEnd = string.find(inputstr, sep)
-	if sepStart then
-		return string.sub(inputstr, 1, sepStart - 1)
+	local start, _ = string.find(input, sep)
+	if start then
+		return string.sub(input, 1, start - 1)
 	end
-	return inputstr
+	return input
 end
 
 local state = ya.sync(function() return tostring(cx.active.current.cwd) end)
@@ -16,22 +16,22 @@ local function fail(s, ...) ya.notify { title = "Fzf", content = string.format(s
 local function entry(_, args)
 	local _permit = ya.hide()
 	local cwd = state()
-	local shell_value = os.getenv("SHELL"):match(".*/(.*)")
+	local shell = os.getenv("SHELL"):match(".*/(.*)")
 	local cmd_args = ""
 
 	local preview_cmd =
 		[===[line={2} && begin=$( if [[ $line -lt 7 ]]; then echo $((line-1)); else echo 6; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}]===]
-	if shell_value == "fish" then
+	if shell == "fish" then
 		preview_cmd =
 			[[set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}]]
-	elseif shell_value == "nu" then
+	elseif shell == "nu" then
 		preview_cmd =
 			[[let line = ({2} | into int); let begin = if $line < 7 { $line - 1 } else { 6 }; bat --highlight-line={2} --color=always --line-range $'($line - $begin):($line + 10)' {1}]]
 	end
 
 	if args[1] == "fzf" then
 		cmd_args = [[fzf --preview='bat --color=always {1}']]
-	elseif args[1] == "rg" and shell_value == "fish" then
+	elseif args[1] == "rg" and shell == "fish" then
 		cmd_args = [[
 			RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case " \
 			fzf --ansi --disabled \
@@ -42,7 +42,7 @@ local function entry(_, args)
 				--preview-window 'up,60%' \
 				--nth '3..'
 		]]
-	elseif args[1] == "rg" and (shell_value == "bash" or shell_value == "zsh") then
+	elseif args[1] == "rg" and (shell == "bash" or shell == "zsh") then
 		cmd_args = [[
 			RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
 			fzf --ansi --disabled \
@@ -53,7 +53,7 @@ local function entry(_, args)
 				--preview-window 'up,60%' \
 				--nth '3..'
 		]]
-	elseif args[1] == "rg" and shell_value == "nu" then
+	elseif args[1] == "rg" and shell == "nu" then
 		local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
 		cmd_args = [[fzf --ansi --disabled --bind "start:reload:]]
 			.. rg_prefix
@@ -62,7 +62,7 @@ local function entry(_, args)
 			.. [[{q} }" --delimiter : --preview ']]
 			.. preview_cmd
 			.. [[' --preview-window 'up,60%' --nth '3..']]
-	elseif args[1] == "rga" and shell_value == "fish" then
+	elseif args[1] == "rga" and shell == "fish" then
 		cmd_args = [[
 			RG_PREFIX="rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' " \
 			fzf --ansi --disabled \
@@ -77,7 +77,7 @@ local function entry(_, args)
 				--preview-window 'up,60%' \
 				--nth '3..'
 		]]
-	elseif args[1] == "rga" and (shell_value == "bash" or shell_value == "zsh") then
+	elseif args[1] == "rga" and (shell == "bash" or shell == "zsh") then
 		cmd_args = [[
 			RG_PREFIX="rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
 			fzf --ansi --disabled \
@@ -92,7 +92,7 @@ local function entry(_, args)
 				--preview-window 'up,60%' \
 				--nth '3..'
 		]]
-	elseif args[1] == "rga" and shell_value == "nu" then
+	elseif args[1] == "rga" and shell == "nu" then
 		local rg_prefix =
 			"rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
 		cmd_args = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
@@ -106,7 +106,7 @@ local function entry(_, args)
 			.. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 	end
 
-	local child, err = Command(shell_value)
+	local child, err = Command(shell)
 		:args({ "-c", cmd_args })
 		:cwd(cwd)
 		:stdin(Command.INHERIT)
@@ -127,7 +127,7 @@ local function entry(_, args)
 
 	local target = output.stdout:gsub("\n$", "")
 
-	local file_url = splitAndGetFirst(target, ":")
+	local file_url = split_and_get_first(target, ":")
 
 	if file_url ~= "" then
 		ya.manager_emit(file_url:match("[/\\]$") and "cd" or "reveal", { file_url })
