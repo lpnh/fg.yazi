@@ -6,6 +6,8 @@ local preview_opts = {
 }
 local preview_cmd = preview_opts[shell] or preview_opts.default
 local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
+local rga_prefix =
+	"rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
 local fzf_args = [[fzf --preview='bat --color=always {1}']]
 local rg_args_opts = {
 	default = [[fzf --ansi --disabled --bind "start:reload:]]
@@ -22,6 +24,18 @@ local rg_args_opts = {
 		.. [[{q} }" --delimiter : --preview ']]
 		.. preview_cmd
 		.. [[' --preview-window 'up,60%' --nth '3..']],
+}
+local rga_args_opts = {
+	default = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
+		.. rga_prefix
+		.. [[{q}" --bind "change:reload:sleep 0.1; ]]
+		.. rga_prefix
+		.. [[{q} || true" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']],
+	nu = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
+		.. rga_prefix
+		.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
+		.. rga_prefix
+		.. [[{q} }" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']],
 }
 
 local function split_and_get_first(input, sep)
@@ -48,44 +62,8 @@ local function entry(_, args)
 		cmd_args = fzf_args
 	elseif args[1] == "rg" then
 		cmd_args = rg_args_opts[shell] or rg_args_opts.default
-	elseif args[1] == "rga" and shell == "fish" then
-		cmd_args = [[
-			RG_PREFIX="rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' " \
-			fzf --ansi --disabled \
-			        --layout=reverse \
-        			--sort \
-        			--header-first \
-        			--header '---- Search inside files ----' \
-				--bind "start:reload:$RG_PREFIX {q}" \
-				--bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
-				--delimiter : \
-				--preview 'rga --smart-case --pretty --context 5 {q} {}' \
-				--preview-window 'up,60%' \
-				--nth '3..'
-		]]
-	elseif args[1] == "rga" and (shell == "bash" or shell == "zsh") then
-		cmd_args = [[
-			RG_PREFIX="rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
-			fzf --ansi --disabled \
-			        --layout=reverse \
-        			--sort \
-        			--header-first \
-        			--header '---- Search inside files ----' \
-				--bind "start:reload:$RG_PREFIX {q}" \
-				--bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
-				--delimiter : \
-				--preview 'rga --smart-case --pretty --context 5 {q} {}' \
-				--preview-window 'up,60%' \
-				--nth '3..'
-		]]
-	elseif args[1] == "rga" and shell == "nu" then
-		local rg_prefix =
-			"rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
-		cmd_args = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
-			.. rg_prefix
-			.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
-			.. rg_prefix
-			.. [[{q} }" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']]
+	elseif args[1] == "rga" then
+		cmd_args = rga_args_opts[shell] or rga_args_opts.default
 	else
 		cmd_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']]
 			.. preview_cmd
