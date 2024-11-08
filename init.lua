@@ -1,3 +1,11 @@
+local shell = os.getenv("SHELL"):match(".*/(.*)")
+local preview_opts = {
+	default = [===[line={2} && begin=$( if [[ $line -lt 7 ]]; then echo $((line-1)); else echo 6; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}]===],
+	fish = [[set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}]],
+	nu = [[let line = ({2} | into int); let begin = if $line < 7 { $line - 1 } else { 6 }; bat --highlight-line={2} --color=always --line-range $'($line - $begin):($line + 10)' {1}]],
+}
+local preview_cmd = preview_opts[shell] or preview_opts.default
+
 local function split_and_get_first(input, sep)
 	if sep == nil then
 		sep = "%s"
@@ -16,18 +24,7 @@ local function fail(s, ...) ya.notify { title = "fg", content = string.format(s,
 local function entry(_, args)
 	local _permit = ya.hide()
 	local cwd = tostring(state())
-	local shell = os.getenv("SHELL"):match(".*/(.*)")
 	local cmd_args = ""
-
-	local preview_cmd =
-		[===[line={2} && begin=$( if [[ $line -lt 7 ]]; then echo $((line-1)); else echo 6; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}]===]
-	if shell == "fish" then
-		preview_cmd =
-			[[set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}]]
-	elseif shell == "nu" then
-		preview_cmd =
-			[[let line = ({2} | into int); let begin = if $line < 7 { $line - 1 } else { 6 }; bat --highlight-line={2} --color=always --line-range $'($line - $begin):($line + 10)' {1}]]
-	end
 
 	if args[1] == "fzf" then
 		cmd_args = [[fzf --preview='bat --color=always {1}']]
