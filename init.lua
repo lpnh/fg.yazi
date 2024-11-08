@@ -5,6 +5,24 @@ local preview_opts = {
 	nu = [[let line = ({2} | into int); let begin = if $line < 7 { $line - 1 } else { 6 }; bat --highlight-line={2} --color=always --line-range $'($line - $begin):($line + 10)' {1}]],
 }
 local preview_cmd = preview_opts[shell] or preview_opts.default
+local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
+local fzf_args = [[fzf --preview='bat --color=always {1}']]
+local rg_args_opts = {
+	default = [[fzf --ansi --disabled --bind "start:reload:]]
+		.. rg_prefix
+		.. [[{q}" --bind "change:reload:sleep 0.1; ]]
+		.. rg_prefix
+		.. [[{q} || true" --delimiter : --preview ']]
+		.. preview_cmd
+		.. [[' --preview-window 'up,60%' --nth '3..']],
+	nu = [[fzf --ansi --disabled --bind "start:reload:]]
+		.. rg_prefix
+		.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
+		.. rg_prefix
+		.. [[{q} }" --delimiter : --preview ']]
+		.. preview_cmd
+		.. [[' --preview-window 'up,60%' --nth '3..']],
+}
 
 local function split_and_get_first(input, sep)
 	if sep == nil then
@@ -27,38 +45,9 @@ local function entry(_, args)
 	local cmd_args = ""
 
 	if args[1] == "fzf" then
-		cmd_args = [[fzf --preview='bat --color=always {1}']]
-	elseif args[1] == "rg" and shell == "fish" then
-		cmd_args = [[
-			RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case " \
-			fzf --ansi --disabled \
-				--bind "start:reload:$RG_PREFIX {q}" \
-				--bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
-				--delimiter : \
-				--preview ']] .. preview_cmd .. [[' \
-				--preview-window 'up,60%' \
-				--nth '3..'
-		]]
-	elseif args[1] == "rg" and (shell == "bash" or shell == "zsh") then
-		cmd_args = [[
-			RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
-			fzf --ansi --disabled \
-				--bind "start:reload:$RG_PREFIX {q}" \
-				--bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
-				--delimiter : \
-				--preview ']] .. preview_cmd .. [[' \
-				--preview-window 'up,60%' \
-				--nth '3..'
-		]]
-	elseif args[1] == "rg" and shell == "nu" then
-		local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
-		cmd_args = [[fzf --ansi --disabled --bind "start:reload:]]
-			.. rg_prefix
-			.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
-			.. rg_prefix
-			.. [[{q} }" --delimiter : --preview ']]
-			.. preview_cmd
-			.. [[' --preview-window 'up,60%' --nth '3..']]
+		cmd_args = fzf_args
+	elseif args[1] == "rg" then
+		cmd_args = rg_args_opts[shell] or rg_args_opts.default
 	elseif args[1] == "rga" and shell == "fish" then
 		cmd_args = [[
 			RG_PREFIX="rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' " \
