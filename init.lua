@@ -9,13 +9,13 @@ local function split_and_get_first(input, sep)
 	return input
 end
 
-local state = ya.sync(function() return tostring(cx.active.current.cwd) end)
+local state = ya.sync(function() return cx.active.current.cwd end)
 
-local function fail(s, ...) ya.notify { title = "Fzf", content = string.format(s, ...), timeout = 5, level = "error" } end
+local function fail(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
 
 local function entry(_, args)
 	local _permit = ya.hide()
-	local cwd = state()
+	local cwd = tostring(state())
 	local shell = os.getenv("SHELL"):match(".*/(.*)")
 	local cmd_args = ""
 
@@ -115,7 +115,7 @@ local function entry(_, args)
 		:spawn()
 
 	if not child then
-		return fail("Spawn `rfzf` failed with error code %s. Do you have it installed?", err)
+		return fail("Spawn command failed with error code %s.", err)
 	end
 
 	local output, err = child:wait_with_output()
