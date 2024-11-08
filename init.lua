@@ -1,15 +1,18 @@
 local shell = os.getenv("SHELL"):match(".*/(.*)")
+
 local preview_opts = {
 	default = [===[line={2} && begin=$( if [[ $line -lt 7 ]]; then echo $((line-1)); else echo 6; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}]===],
 	fish = [[set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}]],
 	nu = [[let line = ({2} | into int); let begin = if $line < 7 { $line - 1 } else { 6 }; bat --highlight-line={2} --color=always --line-range $'($line - $begin):($line + 10)' {1}]],
 }
 local preview_cmd = preview_opts[shell] or preview_opts.default
+
 local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
 local rga_prefix =
 	"rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
+
 local fzf_args = [[fzf --preview='bat --color=always {1}']]
-local rg_args_opts = {
+local rg_args = {
 	default = [[fzf --ansi --disabled --bind "start:reload:]]
 		.. rg_prefix
 		.. [[{q}" --bind "change:reload:sleep 0.1; ]]
@@ -25,7 +28,7 @@ local rg_args_opts = {
 		.. preview_cmd
 		.. [[' --preview-window 'up,60%' --nth '3..']],
 }
-local rga_args_opts = {
+local rga_args = {
 	default = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
 		.. rga_prefix
 		.. [[{q}" --bind "change:reload:sleep 0.1; ]]
@@ -37,6 +40,9 @@ local rga_args_opts = {
 		.. rga_prefix
 		.. [[{q} }" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']],
 }
+local fg_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']]
+	.. preview_cmd
+	.. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 
 local function split_and_get_first(input, sep)
 	if sep == nil then
@@ -61,13 +67,11 @@ local function entry(_, args)
 	if args[1] == "fzf" then
 		cmd_args = fzf_args
 	elseif args[1] == "rg" then
-		cmd_args = rg_args_opts[shell] or rg_args_opts.default
+		cmd_args = rg_args[shell] or rg_args.default
 	elseif args[1] == "rga" then
-		cmd_args = rga_args_opts[shell] or rga_args_opts.default
+		cmd_args = rga_args[shell] or rga_args.default
 	else
-		cmd_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']]
-			.. preview_cmd
-			.. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
+		cmd_args = fg_args
 	end
 
 	local child, err = Command(shell)
