@@ -59,16 +59,16 @@ local state = ya.sync(function() return cx.active.current.cwd end)
 
 local function fail(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
 
-local function entry(_, args)
+local function entry(_, job)
 	local _permit = ya.hide()
 	local cwd = tostring(state())
 	local cmd_args = ""
 
-	if args[1] == "fzf" then
+	if job.args[1] == "fzf" then
 		cmd_args = fzf_args
-	elseif args[1] == "rg" then
+	elseif job.args[1] == "rg" then
 		cmd_args = rg_args[shell] or rg_args.default
-	elseif args[1] == "rga" then
+	elseif job.args[1] == "rga" then
 		cmd_args = rga_args[shell] or rga_args.default
 	else
 		cmd_args = fg_args
