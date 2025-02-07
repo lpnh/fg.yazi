@@ -10,31 +10,31 @@ local bat_tbl = {
 		.. [[ (math "$line-$begin"):(math "$line+10") {1}]],
 }
 local bat_prev = bat_tbl[shell] or bat_tbl.default
-local rg_cmd = "rg --color=always --line-number --smart-case "
-local rga_cmd = "rga --color=always --files-with-matches --smart-case "
+local rg_cmd = "rg --color=always --line-number --smart-case"
+local rga_cmd = "rga --color=always --files-with-matches --smart-case"
 local rga_prev = "rga --context 5 --no-messages --pretty {q} {}"
 
-local rg_args = [[fzf --ansi --disabled --bind "start:reload:]]
-	.. rg_cmd
-	.. [[{q}" --bind "change:reload:sleep 0.1; ]]
-	.. rg_cmd
-	.. [[{q} || true" --delimiter : --preview ']]
-	.. bat_prev
-	.. [[' --preview-window 'up,60%' --nth '3..']]
-local rga_args = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
-	.. rga_cmd
-	.. [[{q}" --bind "change:reload:sleep 0.1; ]]
-	.. rga_cmd
-	.. [[{q} || true" --delimiter : --preview ']]
-	.. rga_prev
-	.. [[' --preview-window 'up,60%' --nth '3..']]
-local fg_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']]
-	.. bat_prev
-	.. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
+local fzf_from = function(grep, prev)
+	local fzf_tbl = {
+		"fzf",
+		"--ansi",
+		"--delimiter=:",
+		"--disabled",
+		"--layout=reverse",
+		"--no-multi",
+		"--nth=3..",
+		"--bind='start:reload:" .. grep .. " {q}'",
+		"--bind='change:reload:sleep 0.1; " .. grep .. " {q} || true'",
+		"--preview='" .. prev .. "'",
+		"--preview-window=up,60%",
+	}
+
+	return table.concat(fzf_tbl, " ")
+end
 
 local args_from = {
-	rg = rg_args,
-	rga = rga_args,
+	rg = fzf_from(rg_cmd, bat_prev),
+	rga = fzf_from(rga_cmd, rga_prev),
 }
 
 local fail = function(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
@@ -42,7 +42,7 @@ local get_cwd = ya.sync(function() return cx.active.current.cwd end)
 
 local function entry(_, job)
 	local _permit = ya.hide()
-	local args = args_from[job.args[1]] or fg_args
+	local args = args_from[job.args[1]]
 	local cwd = tostring(get_cwd())
 
 	local child, err = Command(shell)
