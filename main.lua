@@ -10,23 +10,24 @@ local bat_tbl = {
 		.. [[ (math "$line-$begin"):(math "$line+10") {1}]],
 }
 local bat_prev = bat_tbl[shell] or bat_tbl.default
-
-local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
-local rga_prefix =
-	"rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
+local rg_cmd = "rg --color=always --line-number --smart-case "
+local rga_cmd = "rga --color=always --files-with-matches --smart-case "
+local rga_prev = "rga --context 5 --no-messages --pretty {q} {}"
 
 local rg_args = [[fzf --ansi --disabled --bind "start:reload:]]
-	.. rg_prefix
+	.. rg_cmd
 	.. [[{q}" --bind "change:reload:sleep 0.1; ]]
-	.. rg_prefix
+	.. rg_cmd
 	.. [[{q} || true" --delimiter : --preview ']]
 	.. bat_prev
 	.. [[' --preview-window 'up,60%' --nth '3..']]
 local rga_args = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
-	.. rga_prefix
+	.. rga_cmd
 	.. [[{q}" --bind "change:reload:sleep 0.1; ]]
-	.. rga_prefix
-	.. [[{q} || true" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']]
+	.. rga_cmd
+	.. [[{q} || true" --delimiter : --preview ']]
+	.. rga_prev
+	.. [[' --preview-window 'up,60%' --nth '3..']]
 local fg_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']]
 	.. bat_prev
 	.. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
