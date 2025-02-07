@@ -3,7 +3,6 @@ local shell = os.getenv("SHELL"):match(".*/(.*)")
 local preview_opts = {
 	default = [===[line={2} && begin=$( if [[ $line -lt 7 ]]; then echo $((line-1)); else echo 6; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}]===],
 	fish = [[set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}]],
-	nu = [[let line = ({2} | into int); let begin = if $line < 7 { $line - 1 } else { 6 }; bat --highlight-line={2} --color=always --line-range $'($line - $begin):($line + 10)' {1}]],
 }
 local preview_cmd = preview_opts[shell] or preview_opts.default
 
@@ -12,34 +11,18 @@ local rga_prefix =
 	"rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
 
 local fzf_args = [[fzf --preview='bat --color=always {1}']]
-local rg_args = {
-	default = [[fzf --ansi --disabled --bind "start:reload:]]
-		.. rg_prefix
-		.. [[{q}" --bind "change:reload:sleep 0.1; ]]
-		.. rg_prefix
-		.. [[{q} || true" --delimiter : --preview ']]
-		.. preview_cmd
-		.. [[' --preview-window 'up,60%' --nth '3..']],
-	nu = [[fzf --ansi --disabled --bind "start:reload:]]
-		.. rg_prefix
-		.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
-		.. rg_prefix
-		.. [[{q} }" --delimiter : --preview ']]
-		.. preview_cmd
-		.. [[' --preview-window 'up,60%' --nth '3..']],
-}
-local rga_args = {
-	default = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
-		.. rga_prefix
-		.. [[{q}" --bind "change:reload:sleep 0.1; ]]
-		.. rga_prefix
-		.. [[{q} || true" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']],
-	nu = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
-		.. rga_prefix
-		.. [[{q}" --bind "change:reload:sleep 100ms; try { ]]
-		.. rga_prefix
-		.. [[{q} }" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']],
-}
+local rg_args = [[fzf --ansi --disabled --bind "start:reload:]]
+	.. rg_prefix
+	.. [[{q}" --bind "change:reload:sleep 0.1; ]]
+	.. rg_prefix
+	.. [[{q} || true" --delimiter : --preview ']]
+	.. preview_cmd
+	.. [[' --preview-window 'up,60%' --nth '3..']]
+local rga_args = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
+	.. rga_prefix
+	.. [[{q}" --bind "change:reload:sleep 0.1; ]]
+	.. rga_prefix
+	.. [[{q} || true" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']]
 local fg_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']]
 	.. preview_cmd
 	.. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
@@ -67,9 +50,9 @@ local function entry(_, job)
 	if job.args[1] == "fzf" then
 		cmd_args = fzf_args
 	elseif job.args[1] == "rg" then
-		cmd_args = rg_args[shell] or rg_args.default
+		cmd_args = rg_args
 	elseif job.args[1] == "rga" then
-		cmd_args = rga_args[shell] or rga_args.default
+		cmd_args = rga_args
 	else
 		cmd_args = fg_args
 	end
