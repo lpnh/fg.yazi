@@ -26,7 +26,9 @@ local fzf_from = function(grep, prev)
 		"--bind='start:reload:" .. grep .. " {q}'",
 		"--bind='change:reload:sleep 0.1; " .. grep .. " {q} || true'",
 		"--preview='" .. prev .. "'",
-		"--preview-window=up,60%",
+		"--preview-window=up,65%",
+		"--bind='ctrl-w:change-preview-window(80%|65%)'",
+		"--bind='ctrl-\\:change-preview-window(right|up)'",
 	}
 
 	return table.concat(fzf_tbl, " ")
