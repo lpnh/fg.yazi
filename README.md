@@ -1,5 +1,11 @@
 # fg.yazi
 
+> [!WARNING]
+> this plugin will soon be renamed and some features, such as Nushell support
+> and filename search, will be removed
+>
+> for more details, see https://github.com/lpnh/fg.yazi/issues/5
+
 A Yazi plugin for searching by file content or by filenames using `ripgrep` or
 `ripgrep-all` with `fzf` preview
 
