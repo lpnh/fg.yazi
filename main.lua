@@ -10,7 +10,6 @@ local rg_prefix = "rg --column --line-number --no-heading --color=always --smart
 local rga_prefix =
 	"rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob !'.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "
 
-local fzf_args = [[fzf --preview='bat --color=always {1}']]
 local rg_args = [[fzf --ansi --disabled --bind "start:reload:]]
 	.. rg_prefix
 	.. [[{q}" --bind "change:reload:sleep 0.1; ]]
@@ -47,9 +46,7 @@ local function entry(_, job)
 	local cwd = tostring(state())
 	local cmd_args = ""
 
-	if job.args[1] == "fzf" then
-		cmd_args = fzf_args
-	elseif job.args[1] == "rg" then
+	if job.args[1] == "rg" then
 		cmd_args = rg_args
 	elseif job.args[1] == "rga" then
 		cmd_args = rga_args
