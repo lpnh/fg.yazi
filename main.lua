@@ -58,13 +58,17 @@ local function entry(_, job)
 		:spawn()
 
 	if not child then
-		return fail("Spawn command failed with error code %s.", err)
+		return fail("Command failed with error code %s.", err)
 	end
 
 	local output, err = child:wait_with_output()
-	if not output then
-		return fail("Cannot read `fzf` output, error code %s", err)
-	elseif not output.status.success and output.status.code ~= 130 then
+	if not output then -- unreachable?
+		return fail("Cannot read command output, error code %s", err)
+	elseif output.status.code == 130 then -- interrupted with <ctrl-c> or <esc>
+		return
+	elseif output.status.code == 1 then -- no match
+		return ya.notify { title = "fg", content = "No file selected", timeout = 5 }
+	elseif output.status.code ~= 0 then -- anything other than normal exit
 		return fail("`fzf` exited with error code %s", output.status.code)
 	end
 
