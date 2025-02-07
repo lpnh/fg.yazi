@@ -31,17 +31,6 @@ local fg_args = [[rg --color=always --line-number --no-heading --smart-case '' |
 	.. bat_prev
 	.. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 
-local function split_and_get_first(input, sep)
-	if sep == nil then
-		sep = "%s"
-	end
-	local start, _ = string.find(input, sep)
-	if start then
-		return string.sub(input, 1, start - 1)
-	end
-	return input
-end
-
 local state = ya.sync(function() return cx.active.current.cwd end)
 
 local function fail(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
@@ -79,11 +68,11 @@ local function entry(_, job)
 	end
 
 	local target = output.stdout:gsub("\n$", "")
+	if target ~= "" then
+		local colon_pos = string.find(target, ":")
+		local file_url = colon_pos and string.sub(target, 1, colon_pos - 1) or target
 
-	local file_url = split_and_get_first(target, ":")
-
-	if file_url ~= "" then
-		ya.manager_emit(file_url:match("[/\\]$") and "cd" or "reveal", { file_url })
+		ya.manager_emit("reveal", { file_url })
 	end
 end
 
