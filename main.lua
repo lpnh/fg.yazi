@@ -1,20 +1,15 @@
 local shell = os.getenv("SHELL"):match(".*/(.*)")
 
-local bat_cmd = "bat --color=always --highlight-line={2} --line-range"
-local bat_tbl = {
-	default = [===[line={2} && begin=$(if [[ $line -lt 11 ]]; then echo $((line-1)); else echo 10; fi) && ]===]
-		.. bat_cmd
-		.. [===[ $((line-begin)):$((line+10)) {1}]===],
-	fish = [[set line {2} && set begin (test $line -lt 11  &&  echo (math "$line-1") || echo  10) && ]]
-		.. bat_cmd
-		.. [[ (math "$line-$begin"):(math "$line+10") {1}]],
-}
-local bat_prev = bat_tbl[shell] or bat_tbl.default
-local rg_cmd = "rg --color=always --line-number --smart-case"
-local rga_cmd = "rga --color=always --files-with-matches --smart-case"
-local rga_prev = "rga --context 5 --no-messages --pretty {q} {}"
+local fzf_from = function(job_args)
+	local grep = {
+		rg = "rg --color=always --line-number --smart-case",
+		rga = "rga --color=always --files-with-matches --smart-case",
+	}
+	local prev = {
+		rg = "--preview='bat --color=always --highlight-line={2} {1}' " .. "--preview-window=~3,+{2}+3/2,up,65%",
+		rga = "--preview='rga --context 5 --no-messages --pretty {q} {}' " .. "--preview-window=up,65%",
+	}
 
-local fzf_from = function(grep, prev)
 	local fzf_tbl = {
 		"fzf",
 		"--ansi",
@@ -23,10 +18,9 @@ local fzf_from = function(grep, prev)
 		"--layout=reverse",
 		"--no-multi",
 		"--nth=3..",
-		"--bind='start:reload:" .. grep .. " {q}'",
-		"--bind='change:reload:sleep 0.1; " .. grep .. " {q} || true'",
-		"--preview='" .. prev .. "'",
-		"--preview-window=up,65%",
+		"--bind='start:reload:" .. grep[job_args] .. " {q}'",
+		"--bind='change:reload:sleep 0.1; " .. grep[job_args] .. " {q} || true'",
+		prev[job_args],
 		"--bind='ctrl-w:change-preview-window(80%|65%)'",
 		"--bind='ctrl-\\:change-preview-window(right|up)'",
 	}
@@ -34,17 +28,12 @@ local fzf_from = function(grep, prev)
 	return table.concat(fzf_tbl, " ")
 end
 
-local args_from = {
-	rg = fzf_from(rg_cmd, bat_prev),
-	rga = fzf_from(rga_cmd, rga_prev),
-}
-
 local fail = function(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
 local get_cwd = ya.sync(function() return cx.active.current.cwd end)
 
 local function entry(_, job)
 	local _permit = ya.hide()
-	local args = args_from[job.args[1]]
+	local args = fzf_from(job.args[1])
 	local cwd = tostring(get_cwd())
 
 	local child, err = Command(shell)
