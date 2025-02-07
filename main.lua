@@ -32,25 +32,21 @@ local fg_args = [[rg --color=always --line-number --no-heading --smart-case '' |
 	.. bat_prev
 	.. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 
-local state = ya.sync(function() return cx.active.current.cwd end)
+local args_from = {
+	rg = rg_args,
+	rga = rga_args,
+}
 
-local function fail(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
+local fail = function(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
+local get_cwd = ya.sync(function() return cx.active.current.cwd end)
 
 local function entry(_, job)
 	local _permit = ya.hide()
-	local cwd = tostring(state())
-	local cmd_args = ""
-
-	if job.args[1] == "rg" then
-		cmd_args = rg_args
-	elseif job.args[1] == "rga" then
-		cmd_args = rga_args
-	else
-		cmd_args = fg_args
-	end
+	local args = args_from[job.args[1]] or fg_args
+	local cwd = tostring(get_cwd())
 
 	local child, err = Command(shell)
-		:args({ "-c", cmd_args })
+		:args({ "-c", args })
 		:cwd(cwd)
 		:stdin(Command.INHERIT)
 		:stdout(Command.PIPED)
@@ -58,7 +54,7 @@ local function entry(_, job)
 		:spawn()
 
 	if not child then
-		return fail("Command failed with error code %s.", err)
+		return fail("Command failed with error code %s", err)
 	end
 
 	local output, err = child:wait_with_output()
