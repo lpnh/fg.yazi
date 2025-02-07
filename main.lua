@@ -1,10 +1,15 @@
 local shell = os.getenv("SHELL"):match(".*/(.*)")
 
-local preview_opts = {
-	default = [===[line={2} && begin=$( if [[ $line -lt 7 ]]; then echo $((line-1)); else echo 6; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}]===],
-	fish = [[set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}]],
+local bat_cmd = "bat --color=always --highlight-line={2} --line-range"
+local bat_tbl = {
+	default = [===[line={2} && begin=$(if [[ $line -lt 11 ]]; then echo $((line-1)); else echo 10; fi) && ]===]
+		.. bat_cmd
+		.. [===[ $((line-begin)):$((line+10)) {1}]===],
+	fish = [[set line {2} && set begin (test $line -lt 11  &&  echo (math "$line-1") || echo  10) && ]]
+		.. bat_cmd
+		.. [[ (math "$line-$begin"):(math "$line+10") {1}]],
 }
-local preview_cmd = preview_opts[shell] or preview_opts.default
+local bat_prev = bat_tbl[shell] or bat_tbl.default
 
 local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case "
 local rga_prefix =
@@ -15,7 +20,7 @@ local rg_args = [[fzf --ansi --disabled --bind "start:reload:]]
 	.. [[{q}" --bind "change:reload:sleep 0.1; ]]
 	.. rg_prefix
 	.. [[{q} || true" --delimiter : --preview ']]
-	.. preview_cmd
+	.. bat_prev
 	.. [[' --preview-window 'up,60%' --nth '3..']]
 local rga_args = [[fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --bind "start:reload:]]
 	.. rga_prefix
@@ -23,7 +28,7 @@ local rga_args = [[fzf --ansi --disabled --layout=reverse --sort --header-first 
 	.. rga_prefix
 	.. [[{q} || true" --delimiter : --preview 'rga --smart-case --pretty --context 5 {q} {}' --preview-window 'up,60%' --nth '3..']]
 local fg_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']]
-	.. preview_cmd
+	.. bat_prev
 	.. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
 
 local function split_and_get_first(input, sep)
