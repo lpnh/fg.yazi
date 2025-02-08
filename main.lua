@@ -2,31 +2,56 @@ local shell = os.getenv("SHELL"):match(".*/(.*)")
 local get_cwd = ya.sync(function() return cx.active.current.cwd end)
 local fail = function(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
 
-local cmd_tbl = {
-	rg = {
-		grep = "rg --color=always --line-number --smart-case",
-		prev = "--preview='bat --color=always --highlight-line={2} {1}' --preview-window=~3,+{2}+3/2,up,66%",
-		prompt = "--prompt='rg> '",
-		extra = function(cmd_grep)
-			local logic = {
-				default = { cond = "[[ ! $FZF_PROMPT =~ rg ]] &&", op = "||" },
-				fish = { cond = 'not string match -q "*rg*" $FZF_PROMPT; and', op = "; or" },
-			}
-			local lgc = logic[shell] or logic.default
-			local extra_bind = "--bind='ctrl-f:transform:%s "
-				.. [[echo "rebind(change)+change-prompt(rg> )+disable-search+clear-query+reload:%s {q}" %s ]]
-				.. [[echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query+reload:%s \" \" "']]
-			return string.format(extra_bind, lgc.cond, cmd_grep, lgc.op, cmd_grep)
-		end,
-	},
-	rga = {
-		grep = "rga --color=always --files-with-matches --smart-case",
-		prev = "--preview='rga --context 5 --no-messages --pretty {q} {}' --preview-window=up,66%",
-		prompt = "--prompt='rga> '",
-	},
-}
+local fmt_opts = function(opt)
+	if type(opt) == "string" then
+		return " " .. opt
+	elseif type(opt) == "table" then
+		return " " .. table.concat(opt, " ")
+	end
+	return ""
+end
 
-local fzf_from = function(job_args)
+local get_custom_opts = ya.sync(function(self)
+	local opts = self.custom_opts or {}
+
+	return {
+		fzf = fmt_opts(opts.fzf),
+		rg = fmt_opts(opts.rg),
+		bat = fmt_opts(opts.bat),
+		rga = fmt_opts(opts.rga),
+		rga_preview = fmt_opts(opts.rga_preview),
+	}
+end)
+
+local fzf_from = function(job_args, opts_tbl)
+	local cmd_tbl = {
+		rg = {
+			grep = "rg --color=always --line-number --smart-case" .. opts_tbl.rg,
+			prev = "--preview='bat --color=always "
+				.. opts_tbl.bat
+				.. " --highlight-line={2} {1}' --preview-window=~3,+{2}+3/2,up,66%",
+			prompt = "--prompt='rg> '",
+			extra = function(cmd_grep)
+				local logic = {
+					default = { cond = "[[ ! $FZF_PROMPT =~ rg ]] &&", op = "||" },
+					fish = { cond = 'not string match -q "*rg*" $FZF_PROMPT; and', op = "; or" },
+				}
+				local lgc = logic[shell] or logic.default
+				local extra_bind = "--bind='ctrl-f:transform:%s "
+					.. [[echo "rebind(change)+change-prompt(rg> )+disable-search+clear-query+reload:%s {q}" %s ]]
+					.. [[echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query+reload:%s \" \" "']]
+				return string.format(extra_bind, lgc.cond, cmd_grep, lgc.op, cmd_grep)
+			end,
+		},
+		rga = {
+			grep = "rga --color=always --files-with-matches --smart-case" .. opts_tbl.rga,
+			prev = "--preview='rga --context 5 --no-messages --pretty "
+				.. opts_tbl.rga_preview
+				.. " {q} {}' --preview-window=up,66%",
+			prompt = "--prompt='rga> '",
+		},
+	}
+
 	local cmd = cmd_tbl[job_args]
 	if not cmd then
 		return fail("`%s` is not a valid argument. Use `rg` or `rga` instead", job_args)
@@ -46,6 +71,7 @@ local fzf_from = function(job_args)
 		"--bind='change:reload:sleep 0.1; " .. cmd.grep .. " {q} || true'",
 		"--bind='ctrl-w:change-preview-window(80%|66%)'",
 		"--bind='ctrl-\\:change-preview-window(right|up)'",
+		opts_tbl.fzf,
 	}
 
 	if cmd.extra then
@@ -55,9 +81,22 @@ local fzf_from = function(job_args)
 	return table.concat(fzf_tbl, " ")
 end
 
+local function setup(self, opts)
+	opts = opts or {}
+
+	self.custom_opts = {
+		fzf = opts.fzf,
+		rg = opts.rg,
+		bat = opts.bat,
+		rga = opts.rga,
+		rga_preview = opts.rga_preview,
+	}
+end
+
 local function entry(_, job)
 	local _permit = ya.hide()
-	local args = fzf_from(job.args[1])
+	local custom_opts = get_custom_opts()
+	local args = fzf_from(job.args[1], custom_opts)
 	local cwd = tostring(get_cwd())
 
 	local child, err = Command(shell)
@@ -92,4 +131,4 @@ local function entry(_, job)
 	end
 end
 
-return { entry = entry }
+return { entry = entry, setup = setup }
