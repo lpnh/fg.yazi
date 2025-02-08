@@ -1,14 +1,34 @@
 local shell = os.getenv("SHELL"):match(".*/(.*)")
 
-local fzf_from = function(job_args)
-	local grep = {
-		rg = "rg --color=always --line-number --smart-case",
-		rga = "rga --color=always --files-with-matches --smart-case",
-	}
-	local prev = {
-		rg = "--preview='bat --color=always --highlight-line={2} {1}' " .. "--preview-window=~3,+{2}+3/2,up,65%",
-		rga = "--preview='rga --context 5 --no-messages --pretty {q} {}' " .. "--preview-window=up,65%",
-	}
+local cmd_tbl = {
+	rg = {
+		grep = "rg --color=always --line-number --smart-case",
+		prev = "--preview='bat --color=always --highlight-line={2} {1}' --preview-window=~3,+{2}+3/2,up,65%",
+		prompt = "--prompt='rg> '",
+		extra = function(cmd_grep)
+			local logic = {
+				default = { cond = "[[ ! $FZF_PROMPT =~ rg ]] &&", op = "||" },
+				fish = { cond = 'not string match -q "*rg*" $FZF_PROMPT; and', op = "; or" },
+			}
+			local lgc = logic[shell] or logic.default
+			local extra_bind = "--bind='ctrl-f:transform:%s "
+				.. [===[echo "rebind(change)+change-prompt(rg> )+disable-search+clear-query+reload:%s {q}" %s ]===]
+				.. [===[echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query+reload:%s \" \" "']===]
+			return string.format(extra_bind, lgc.cond, cmd_grep, lgc.op, cmd_grep)
+		end,
+	},
+	rga = {
+		grep = "rga --color=always --files-with-matches --smart-case",
+		prev = "--preview='rga --context 5 --no-messages --pretty {q} {}' --preview-window=up,65%",
+		prompt = "--prompt='rga> '",
+	},
+}
+
+local function fzf_from(job_args)
+	local cmd = cmd_tbl[job_args]
+	if not cmd then
+		return ""
+	end
 
 	local fzf_tbl = {
 		"fzf",
@@ -18,12 +38,17 @@ local fzf_from = function(job_args)
 		"--layout=reverse",
 		"--no-multi",
 		"--nth=3..",
-		"--bind='start:reload:" .. grep[job_args] .. " {q}'",
-		"--bind='change:reload:sleep 0.1; " .. grep[job_args] .. " {q} || true'",
-		prev[job_args],
+		cmd.prompt,
+		string.format("--bind='start:reload:%s {q}'", cmd.grep),
+		string.format("--bind='change:reload:sleep 0.1; %s {q} || true'", cmd.grep),
+		cmd.prev,
 		"--bind='ctrl-w:change-preview-window(80%|65%)'",
 		"--bind='ctrl-\\:change-preview-window(right|up)'",
 	}
+
+	if cmd.extra then
+		table.insert(fzf_tbl, cmd.extra(cmd.grep))
+	end
 
 	return table.concat(fzf_tbl, " ")
 end
