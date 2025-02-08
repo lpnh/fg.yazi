@@ -14,8 +14,8 @@ local cmd_tbl = {
 			}
 			local lgc = logic[shell] or logic.default
 			local extra_bind = "--bind='ctrl-f:transform:%s "
-				.. [===[echo "rebind(change)+change-prompt(rg> )+disable-search+clear-query+reload:%s {q}" %s ]===]
-				.. [===[echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query+reload:%s \" \" "']===]
+				.. [[echo "rebind(change)+change-prompt(rg> )+disable-search+clear-query+reload:%s {q}" %s ]]
+				.. [[echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query+reload:%s \" \" "']]
 			return string.format(extra_bind, lgc.cond, cmd_grep, lgc.op, cmd_grep)
 		end,
 	},
@@ -29,7 +29,7 @@ local cmd_tbl = {
 local fzf_from = function(job_args)
 	local cmd = cmd_tbl[job_args]
 	if not cmd then
-		return fail("`%s` is not a valid argument. use rg or rga instead", job_args)
+		return fail("`%s` is not a valid argument. Use `rg` or `rga` instead", job_args)
 	end
 
 	local fzf_tbl = {
@@ -40,10 +40,10 @@ local fzf_from = function(job_args)
 		"--layout=reverse",
 		"--no-multi",
 		"--nth=3..",
-		cmd.prompt,
-		string.format("--bind='start:reload:%s {q}'", cmd.grep),
-		string.format("--bind='change:reload:sleep 0.1; %s {q} || true'", cmd.grep),
 		cmd.prev,
+		cmd.prompt,
+		"--bind='start:reload:" .. cmd.grep .. " {q}'",
+		"--bind='change:reload:sleep 0.1; " .. cmd.grep .. " {q} || true'",
 		"--bind='ctrl-w:change-preview-window(80%|66%)'",
 		"--bind='ctrl-\\:change-preview-window(right|up)'",
 	}
