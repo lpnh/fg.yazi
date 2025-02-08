@@ -1,9 +1,11 @@
 local shell = os.getenv("SHELL"):match(".*/(.*)")
+local get_cwd = ya.sync(function() return cx.active.current.cwd end)
+local fail = function(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
 
 local cmd_tbl = {
 	rg = {
 		grep = "rg --color=always --line-number --smart-case",
-		prev = "--preview='bat --color=always --highlight-line={2} {1}' --preview-window=~3,+{2}+3/2,up,65%",
+		prev = "--preview='bat --color=always --highlight-line={2} {1}' --preview-window=~3,+{2}+3/2,up,66%",
 		prompt = "--prompt='rg> '",
 		extra = function(cmd_grep)
 			local logic = {
@@ -19,15 +21,15 @@ local cmd_tbl = {
 	},
 	rga = {
 		grep = "rga --color=always --files-with-matches --smart-case",
-		prev = "--preview='rga --context 5 --no-messages --pretty {q} {}' --preview-window=up,65%",
+		prev = "--preview='rga --context 5 --no-messages --pretty {q} {}' --preview-window=up,66%",
 		prompt = "--prompt='rga> '",
 	},
 }
 
-local function fzf_from(job_args)
+local fzf_from = function(job_args)
 	local cmd = cmd_tbl[job_args]
 	if not cmd then
-		return ""
+		return fail("`%s` is not a valid argument. use rg or rga instead", job_args)
 	end
 
 	local fzf_tbl = {
@@ -42,7 +44,7 @@ local function fzf_from(job_args)
 		string.format("--bind='start:reload:%s {q}'", cmd.grep),
 		string.format("--bind='change:reload:sleep 0.1; %s {q} || true'", cmd.grep),
 		cmd.prev,
-		"--bind='ctrl-w:change-preview-window(80%|65%)'",
+		"--bind='ctrl-w:change-preview-window(80%|66%)'",
 		"--bind='ctrl-\\:change-preview-window(right|up)'",
 	}
 
@@ -52,9 +54,6 @@ local function fzf_from(job_args)
 
 	return table.concat(fzf_tbl, " ")
 end
-
-local fail = function(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
-local get_cwd = ya.sync(function() return cx.active.current.cwd end)
 
 local function entry(_, job)
 	local _permit = ya.hide()
