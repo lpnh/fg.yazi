@@ -1,3 +1,5 @@
+--- @since 25.2.7
+
 local shell = os.getenv("SHELL"):match(".*/(.*)")
 local get_cwd = ya.sync(function() return cx.active.current.cwd end)
 local fail = function(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
