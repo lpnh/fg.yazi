@@ -1,91 +1,78 @@
 # fg.yazi
 
-> [!WARNING]
-> this plugin will soon be renamed and some features, such as Nushell support
-> and filename search, will be removed
->
-> for more details, see https://github.com/lpnh/fg.yazi/issues/5
+> [!NOTE]
+> this plugin is only guaranteed to be compatible with Yazi nightly
 
-A Yazi plugin for searching by file content or by filenames using `ripgrep` or
-`ripgrep-all` with `fzf` preview
+a Yazi plugin that integrates `fzf` with `bat` preview for `rg` search and
+`rga` preview for `rga` search
 
-Supported shells: `bash`, `fish`, `nushell`, and `zsh`
+**supports**: `bash`, `fish`, and `zsh`
 
-## Dependencies
+## dependencies
 
-- [fzf](https://junegunn.github.io/fzf/)
-- [ripgrep](https://github.com/BurntSushi/ripgrep) and/or [ripgrep-all](https://github.com/phiresky/ripgrep-all)
 - [bat](https://github.com/sharkdp/bat)
+- [fzf](https://junegunn.github.io/fzf/)
+- [ripgrep](https://github.com/BurntSushi/ripgrep)
+- [ripgrep-all](https://github.com/phiresky/ripgrep-all) (optional)
 
-## Install
+## installation
 
-```bash
-# Add the plugin
+```sh
 ya pack -a lpnh/fg
-
-# Install the plugin
-ya pack -i
-
-# Upgrade the plugin
-ya pack -u
 ```
 
-## Usage
+## usage
 
-The following snippets should be included on your `~/.config/yazi/keymap.toml`
-file. Make sure the keys are not used elsewhere.
+### plugin args
 
-### Search by content using ripgrep
+this plugin supports two arguments:
 
-This option uses `ripgrep` to output all the lines of all files, and then uses
-`fzf` to fuzzy matching.
+- `rg`:
+   - `rg` search
+   - `bat` preview
+   - `rg` match (default)
+   - `fzf` match (alternative)
+
+- `rga`:
+   - `rga` search
+   - `rga` preview
+   - `rga` match
+
+below is an example of how to configure both in the
+`~/.config/yazi/keymap.toml` file:
 
 ```toml
 [[manager.prepend_keymap]]
-on   = [ "f","g" ]
-run  = "plugin fg"
-desc = "find file by content (fuzzy match)"
-```
+on = ["f", "r"]
+run = "plugin fg rg"
+desc = "Search file by content (rg)"
 
-The following option passes the input to `ripgrep` for a match search, reusing
-the `rg` search each time the input is changed. This is useful for searching in
-large folders due to increased speed, but it does not support fuzzy matching.
-
-```toml
 [[manager.prepend_keymap]]
-on   = [ "f","G" ]
-run  = "plugin fg --args='rg'"
-desc = "find file by content (ripgrep match)"
+on = ["f", "a"]
+run = "plugin fg rga"
+desc = "Search file by content (rga)"
 ```
 
-### Search by content using ripgrep-all
+### fzf binds
 
-This option uses `ripgrep-all` to output all the lines of all files, and then
-uses `fzf` to fuzzy matching.
+this plugin provides three custom `fzf` keybindings:
 
-```toml
-[[manager.prepend_keymap]]
-on   = [ "f","a" ]
-run  = "plugin fg --args='rga'"
-desc = "find file by content (ripgrep-all)"
-```
+- `<ctrl-w>`: toggle the preview window size (65%, 80%)
+- `<ctrl-\>`: toggle the preview window position (top, right)
+- `<ctrl-f>`: toggle the matching method (rg, fzf)
 
-### Search by filename with fzf
+## theme
 
-```toml
-[[manager.prepend_keymap]]
-on   = [ "f","f" ]
-run  = "plugin fg --args='fzf'"
-desc = "find file by filename"
-```
+the default `fzf` colors can be customized using the `FZF_DEFAULT_OPTS` env
+variable. for an example, check out the [Catppuccin's
+repo](https://github.com/catppuccin/fzf?tab=readme-ov-file#usage)
 
-## Tips
+## acknowledgments
 
-You can customize the default colors by using the `fzf` environment variable,
-`FZF_DEFAULT_OPTS`. For an example, check out the [Catppuccin's
-repo](https://github.com/catppuccin/fzf?tab=readme-ov-file#usage).
+@vvatikiotis for the `rga`
+[integration](https://github.com/lpnh/fg.yazi/pull/1)
 
-## About
-
-This is a fork of DreamMaoMao's `fg.yazi` plugin, you can find it at
-<https://gitee.com/DreamMaoMao/fg.yazi>
+this is a derivative of @DreamMaoMao's `fg.yazi` plugin. consider using the
+original one instead; you can find it at
+<https://gitee.com/DreamMaoMao/fg.yazi>, with a mirror available at
+<https://github.com/DreamMaoMao/fg.yazi>
