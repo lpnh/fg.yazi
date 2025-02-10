@@ -61,13 +61,16 @@ this plugin provides three custom `fzf` keybindings:
 - `<ctrl-\>`: toggle the preview window position (top, right)
 - `<ctrl-f>`: toggle the matching method (rg, fzf)
 
-## configuration
+## customization
 
-### theme
+### color themes
 
-the default `fzf` colors can be customized using the `FZF_DEFAULT_OPTS` env
-variable. for an example, check out the [Catppuccin's
+you can customize the default `fzf` colors using the `FZF_DEFAULT_OPTS`
+environment variable. for an example, check out [Catppuccin's fzf
 repo](https://github.com/catppuccin/fzf?tab=readme-ov-file#usage)
+
+more examples of color themes can be found in the [fzf
+documentation](https://github.com/junegunn/fzf/blob/master/ADVANCED.md#color-themes)
 
 ### advanced
 
