@@ -41,8 +41,8 @@ local fzf_from = function(job_args, opts_tbl)
 				local lgc = logic[shell] or logic.default
 				local extra_bind = "--bind='ctrl-s:transform:%s "
 					.. [[echo "rebind(change)+change-prompt(rg> )+disable-search+clear-query+reload:%s \{q}" %s ]]
-					.. [[echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query+reload:%s \{q}"']]
-				return string.format(extra_bind, lgc.cond, cmd_grep, lgc.op, cmd_grep)
+					.. [[echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query"']]
+				return string.format(extra_bind, lgc.cond, cmd_grep, lgc.op)
 			end,
 		},
 		rga = {
