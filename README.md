@@ -1,91 +1,140 @@
-# fg.yazi
+# fr.yazi
 
-> [!WARNING]
-> this plugin will soon be renamed and some features, such as Nushell support
-> and filename search, will be removed
->
-> for more details, see https://github.com/lpnh/fg.yazi/issues/5
+> [!NOTE]
+> this plugin is only guaranteed to be compatible with Yazi nightly
 
-A Yazi plugin for searching by file content or by filenames using `ripgrep` or
-`ripgrep-all` with `fzf` preview
+a Yazi plugin that integrates `fzf` with `bat` preview for `rg` search and
+`rga` preview for `rga` search
 
-Supported shells: `bash`, `fish`, `nushell`, and `zsh`
+**supports**: `bash`, `fish`, and `zsh`
 
-## Dependencies
+## dependencies
 
-- [fzf](https://junegunn.github.io/fzf/)
-- [ripgrep](https://github.com/BurntSushi/ripgrep) and/or [ripgrep-all](https://github.com/phiresky/ripgrep-all)
 - [bat](https://github.com/sharkdp/bat)
+- [fzf](https://junegunn.github.io/fzf/)
+- [ripgrep](https://github.com/BurntSushi/ripgrep)
+- [ripgrep-all](https://github.com/phiresky/ripgrep-all) (optional)
 
-## Install
+## installation
 
-```bash
-# Add the plugin
-ya pack -a lpnh/fg
-
-# Install the plugin
-ya pack -i
-
-# Upgrade the plugin
-ya pack -u
+```sh
+ya pack -a lpnh/fr
 ```
 
-## Usage
+## usage
 
-The following snippets should be included on your `~/.config/yazi/keymap.toml`
-file. Make sure the keys are not used elsewhere.
+### plugin args
 
-### Search by content using ripgrep
+this plugin supports two arguments:
 
-This option uses `ripgrep` to output all the lines of all files, and then uses
-`fzf` to fuzzy matching.
+- `rg`:
+   - `rg` search
+   - `bat` preview
+   - `rg` match (default)
+   - `fzf` match (alternative)
+
+- `rga`:
+   - `rga` search
+   - `rga` preview
+   - `rga` match
+
+below is an example of how to configure both in the
+`~/.config/yazi/keymap.toml` file:
 
 ```toml
 [[manager.prepend_keymap]]
-on   = [ "f","g" ]
-run  = "plugin fg"
-desc = "find file by content (fuzzy match)"
-```
+on = ["f", "r"]
+run = "plugin fr rg"
+desc = "Search file by content (rg)"
 
-The following option passes the input to `ripgrep` for a match search, reusing
-the `rg` search each time the input is changed. This is useful for searching in
-large folders due to increased speed, but it does not support fuzzy matching.
-
-```toml
 [[manager.prepend_keymap]]
-on   = [ "f","G" ]
-run  = "plugin fg --args='rg'"
-desc = "find file by content (ripgrep match)"
+on = ["f", "a"]
+run = "plugin fr rga"
+desc = "Search file by content (rga)"
 ```
 
-### Search by content using ripgrep-all
+### fzf binds
 
-This option uses `ripgrep-all` to output all the lines of all files, and then
-uses `fzf` to fuzzy matching.
+this plugin provides the following custom `fzf` keybindings:
 
-```toml
-[[manager.prepend_keymap]]
-on   = [ "f","a" ]
-run  = "plugin fg --args='rga'"
-desc = "find file by content (ripgrep-all)"
+- `ctrl-r`: reload the search
+- `ctrl-s`: toggle the matching method (rg, fzf)
+- `ctrl-]`: toggle the preview window size (66%, 80%)
+- `ctrl-\`: toggle the preview window position (top, right)
+
+## customization
+
+### color themes
+
+you can customize the default `fzf` colors using the `FZF_DEFAULT_OPTS`
+environment variable. for an example, check out [Catppuccin's fzf
+repo](https://github.com/catppuccin/fzf?tab=readme-ov-file#usage)
+
+more examples of color themes can be found in the [fzf
+documentation](https://github.com/junegunn/fzf/blob/master/ADVANCED.md#color-themes)
+
+### advanced
+
+for those seeking further customization, you can tweak all the integrated tools
+used by this plugin in your `~/.config/yazi/init.lua` file. simply pass a table
+to the `setup` function with any of the following fields and their respectives
+options:
+
+```lua
+require("fr"):setup({
+    fzf,
+    rg,
+    bat,
+    rga,
+    rga_preview,
+})
 ```
 
-### Search by filename with fzf
+all fields are optional and accept either a string or a table of strings
+containing command-line options.
 
-```toml
-[[manager.prepend_keymap]]
-on   = [ "f","f" ]
-run  = "plugin fg --args='fzf'"
-desc = "find file by filename"
+example:
+
+```lua
+require("fr"):setup {
+	fzf = [[--info-command='echo -e "$FZF_INFO 💛"'  --no-scrollbar --pointer '󰼛']],
+	rg = "--colors 'line:fg:red' --colors 'match:style:nobold'",
+	bat = "--style 'header,grid'",
+	rga = {
+		"--hidden",
+		"--follow",
+		"--no-ignore",
+		"--glob",
+		"'!.git'",
+		"--glob",
+		"!'.venv'",
+		"--glob",
+		"'!node_modules'",
+		"--glob",
+		"'!.history'",
+		"--glob",
+		"'!.Rproj.user'",
+		"--glob",
+		"'!.ipynb_checkpoints'",
+	},
+	rga_preview = {
+		"--colors 'line:fg:red'"
+			.. " --colors 'match:fg:blue'"
+			.. " --colors 'match:bg:black'"
+			.. " --colors 'match:style:nobold'",
+	},
+}
 ```
 
-## Tips
+almost everything from interface elements to search filters can be customized —
+you just need to find the right flag. that's the hard part. lol
 
-You can customize the default colors by using the `fzf` environment variable,
-`FZF_DEFAULT_OPTS`. For an example, check out the [Catppuccin's
-repo](https://github.com/catppuccin/fzf?tab=readme-ov-file#usage).
+## acknowledgments
 
-## About
+@vvatikiotis for the `rga`
+[integration](https://github.com/lpnh/fr.yazi/pull/1)
 
-This is a fork of DreamMaoMao's `fg.yazi` plugin, you can find it at
-<https://gitee.com/DreamMaoMao/fg.yazi>
+this is a derivative of @DreamMaoMao's `fg.yazi` plugin. consider using the
+original one instead; you can find it at
+<https://gitee.com/DreamMaoMao/fg.yazi>, with a mirror available at
+<https://github.com/DreamMaoMao/fg.yazi>
