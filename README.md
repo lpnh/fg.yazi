@@ -55,8 +55,9 @@ desc = "Search file by content (rga)"
 
 ### fzf binds
 
-this plugin provides three custom `fzf` keybindings:
+this plugin provides the following custom `fzf` keybindings:
 
+- `ctrl-r`: reload the search
 - `ctrl-s`: toggle the matching method (rg, fzf)
 - `ctrl-]`: toggle the preview window size (66%, 80%)
 - `ctrl-\`: toggle the preview window position (top, right)

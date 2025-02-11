@@ -40,7 +40,7 @@ local fzf_from = function(job_args, opts_tbl)
 				}
 				local lgc = logic[shell] or logic.default
 				local extra_bind = "--bind='ctrl-s:transform:%s "
-					.. [[echo "rebind(change)+change-prompt(rg> )+disable-search+clear-query+reload:%s \{q}" %s ]]
+					.. [[echo "rebind(change)+change-prompt(rg> )+disable-search+clear-query+reload(%s {q} || true)" %s ]]
 					.. [[echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query"']]
 				return string.format(extra_bind, lgc.cond, cmd_grep, lgc.op)
 			end,
@@ -73,6 +73,7 @@ local fzf_from = function(job_args, opts_tbl)
 		"--bind='change:reload:sleep 0.1; " .. cmd.grep .. " {q} || true'",
 		"--bind='ctrl-]:change-preview-window(80%|66%)'",
 		"--bind='ctrl-\\:change-preview-window(right|up)'",
+		"--bind='ctrl-r:clear-query+reload:" .. cmd.grep .. " {q} || true'",
 		opts_tbl.fzf,
 	}
 
