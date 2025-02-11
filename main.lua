@@ -2,7 +2,7 @@
 
 local shell = os.getenv("SHELL"):match(".*/(.*)")
 local get_cwd = ya.sync(function() return cx.active.current.cwd end)
-local fail = function(s, ...) ya.notify { title = "fg", content = string.format(s, ...), timeout = 5, level = "error" } end
+local fail = function(s, ...) ya.notify { title = "fr", content = string.format(s, ...), timeout = 5, level = "error" } end
 
 local fmt_opts = function(opt)
 	if type(opt) == "string" then
@@ -120,7 +120,7 @@ local function entry(_, job)
 	elseif output.status.code == 130 then -- interrupted with <ctrl-c> or <esc>
 		return
 	elseif output.status.code == 1 then -- no match
-		return ya.notify { title = "fg", content = "No file selected", timeout = 5 }
+		return ya.notify { title = "fr", content = "No file selected", timeout = 5 }
 	elseif output.status.code ~= 0 then -- anything other than normal exit
 		return fail("`fzf` exited with error code %s", output.status.code)
 	end

@@ -1,4 +1,4 @@
-# fg.yazi
+# fr.yazi
 
 > [!NOTE]
 > this plugin is only guaranteed to be compatible with Yazi nightly
@@ -18,7 +18,7 @@ a Yazi plugin that integrates `fzf` with `bat` preview for `rg` search and
 ## installation
 
 ```sh
-ya pack -a lpnh/fg
+ya pack -a lpnh/fr
 ```
 
 ## usage
@@ -44,12 +44,12 @@ below is an example of how to configure both in the
 ```toml
 [[manager.prepend_keymap]]
 on = ["f", "r"]
-run = "plugin fg rg"
+run = "plugin fr rg"
 desc = "Search file by content (rg)"
 
 [[manager.prepend_keymap]]
 on = ["f", "a"]
-run = "plugin fg rga"
+run = "plugin fr rga"
 desc = "Search file by content (rga)"
 ```
 
@@ -81,7 +81,7 @@ to the `setup` function with any of the following fields and their respectives
 options:
 
 ```lua
-require("fg"):setup({
+require("fr"):setup({
     fzf,
     rg,
     bat,
@@ -96,7 +96,7 @@ containing command-line options.
 example:
 
 ```lua
-require("fg"):setup {
+require("fr"):setup {
 	fzf = [[--info-command='echo -e "$FZF_INFO 💛"'  --no-scrollbar --pointer '󰼛']],
 	rg = "--colors 'line:fg:red' --colors 'match:style:nobold'",
 	bat = "--style 'header,grid'",
@@ -132,7 +132,7 @@ you just need to find the right flag. that's the hard part. lol
 ## acknowledgments
 
 @vvatikiotis for the `rga`
-[integration](https://github.com/lpnh/fg.yazi/pull/1)
+[integration](https://github.com/lpnh/fr.yazi/pull/1)
 
 this is a derivative of @DreamMaoMao's `fg.yazi` plugin. consider using the
 original one instead; you can find it at
