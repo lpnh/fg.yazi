@@ -39,7 +39,7 @@ local fzf_from = function(job_args, opts_tbl)
 					fish = { cond = 'not string match -q "*rg*" $FZF_PROMPT; and', op = "; or" },
 				}
 				local lgc = logic[shell] or logic.default
-				local extra_bind = "--bind='ctrl-f:transform:%s "
+				local extra_bind = "--bind='ctrl-s:transform:%s "
 					.. [[echo "rebind(change)+change-prompt(rg> )+disable-search+clear-query+reload:%s {q}" %s ]]
 					.. [[echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query+reload:%s \" \" "']]
 				return string.format(extra_bind, lgc.cond, cmd_grep, lgc.op, cmd_grep)
@@ -71,7 +71,7 @@ local fzf_from = function(job_args, opts_tbl)
 		cmd.prompt,
 		"--bind='start:reload:" .. cmd.grep .. " {q}'",
 		"--bind='change:reload:sleep 0.1; " .. cmd.grep .. " {q} || true'",
-		"--bind='ctrl-w:change-preview-window(80%|66%)'",
+		"--bind='ctrl-]:change-preview-window(80%|66%)'",
 		"--bind='ctrl-\\:change-preview-window(right|up)'",
 		opts_tbl.fzf,
 	}

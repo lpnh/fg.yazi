@@ -57,9 +57,9 @@ desc = "Search file by content (rga)"
 
 this plugin provides three custom `fzf` keybindings:
 
-- `<ctrl-w>`: toggle the preview window size (65%, 80%)
+- `<ctrl-]>`: toggle the preview window size (66%, 80%)
 - `<ctrl-\>`: toggle the preview window position (top, right)
-- `<ctrl-f>`: toggle the matching method (rg, fzf)
+- `<ctrl-s>`: toggle the matching method (rg, fzf)
 
 ## customization
 
